@@ -1,14 +1,51 @@
 const { app } = require("./app");
-const http = require("http");
-// const socketIo = require('socket.io');
-const { configureWebSocket } = require("./websocket.js");
+const { ApolloServer, gql } = require("apollo-server-express");
 
-const PORT = process.env.PORT || 5000;
+// Simulando um banco de dados
+const db = {
+  dispositivos: {},
+  metricas: [],
+};
 
-const server = http.createServer(app);
+const typeDefs = gql`
+  type Dispositivo {
+    id: ID!
+    marca: String!
+  }
 
-const io = configureWebSocket(server);
+  type Metrica {
+    id_dispositivo: ID!
+    quantidade_posicao: Int!
+    total_km: Float!
+  }
 
-server.listen(PORT, () => {
+  type Query {
+    consultaDispositivo(id_dispositivo: ID!, dia: String): Metrica
+    consultaMarca(marca: String!, dia: String): Metrica
+    consultaGeral(dia: String): Metrica
+  }
+`;
+
+const resolvers = {
+  Query: {
+    consultaDispositivo: (_, { id_dispositivo, dia }) => {
+      // Lógica para consultar e retornar métricas por dispositivo
+    },
+    consultaMarca: (_, { marca, dia }) => {
+      // Lógica para consultar e retornar métricas por marca
+    },
+    consultaGeral: (_, { dia }) => {
+      // Lógica para consultar e retornar métricas gerais
+    },
+  },
+};
+
+const server = new ApolloServer({ typeDefs, resolvers });
+
+server.applyMiddleware({ app });
+
+const PORT = process.env.PORT || 8000;
+
+app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

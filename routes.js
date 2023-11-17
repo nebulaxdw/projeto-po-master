@@ -1,39 +1,31 @@
 const { Router } = require("express");
-const { prismaClient } = require("./prismaClient.js");
-const DispositivoController = require("./controllers/dispositivoController.js");
 
 const router = Router();
 
-const dispositivoController = new DispositivoController();
+router.post("/api/nova-localizacao", (req, res) => {
+  const { id_dispositivo, marca, distancia } = req.body;
 
-// Rota para criar um dispositivo
-router.post("/dispositivos", async (req, res) => {
-  // Implemente a lógica para criar um dispositivo no banco de dado
-  return dispositivoController.create(req, res);
-});
+  // Lógica para processar a distância acumulada e incrementar o número de posições
+  // Salvar as informações no banco de dados (simulado aqui)
+  if (!db.dispositivos[id_dispositivo]) {
+    db.dispositivos[id_dispositivo] = {
+      marca,
+      quantidade_posicao: 0,
+      total_km: 0,
+    };
+  }
 
-// Rota para atualizar um dispositivo
-router.put("/dispositivos/:id", async (req, res) => {
-  // Implemente a lógica para atualizar um dispositivo no banco de dados
-  return dispositivoController.update(req, res);
-});
+  db.dispositivos[id_dispositivo].quantidade_posicao += 1;
+  db.dispositivos[id_dispositivo].total_km += distancia;
 
-// Rota para obter informações de um dispositivo
-router.get("/dispositivos/:id", async (req, res) => {
-  // Implemente a lógica para consultar um dispositivo no banco de dados
-  return dispositivoController.getById(req, res);
-});
+  // Salvar a métrica
+  db.metricas.push({
+    id_dispositivo,
+    quantidade_posicao: db.dispositivos[id_dispositivo].quantidade_posicao,
+    total_km: db.dispositivos[id_dispositivo].total_km,
+  });
 
-// Rota para remover um dispositivo
-router.delete("/dispositivos/:id", async (req, res) => {
-  // Implemente a lógica para remover um dispositivo do banco de dados
-  return dispositivoController.delete(req, res);
-});
-
-// Rota para consultar o histórico de localizações de um dispositivo
-router.get("/dispositivos/:id/localizacoes", async (req, res) => {
-  // Implemente a lógica para consultar o histórico de localizações de um dispositivo
-  return dispositivoController.getLocalizacoes(req, res);
+  res.json({ message: "Localização recebida com sucesso!" });
 });
 
 module.exports = { router };
